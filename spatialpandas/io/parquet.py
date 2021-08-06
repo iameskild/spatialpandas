@@ -50,6 +50,7 @@ def _load_parquet_pandas_metadata(
     storage_options=None,
     engine_kwargs=None,
 ):
+    engine_kwargs = engine_kwargs or {}
     filesystem = validate_coerce_filesystem(path, filesystem, storage_options)
     if not filesystem.exists(path):
         raise ValueError("Path not found: " + path)
@@ -59,7 +60,7 @@ def _load_parquet_pandas_metadata(
             path,
             filesystem=filesystem,
             validate_schema=False,
-            **(engine_kwargs or {}),
+            **engine_kwargs,
         )
         common_metadata = pqds.common_metadata
         if common_metadata is None:
@@ -122,6 +123,7 @@ def read_parquet(
     engine_kwargs: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> GeoDataFrame:
+    engine_kwargs = engine_kwargs or {}
     filesystem = validate_coerce_filesystem(path, filesystem, storage_options)
 
     # Load pandas parquet metadata
@@ -154,7 +156,7 @@ def read_parquet(
         path,
         filesystem=filesystem,
         validate_schema=False,
-        **(engine_kwargs or {}),
+        **engine_kwargs,
         **kwargs,
     ).read(columns=columns).to_pandas()
 
@@ -176,6 +178,8 @@ def to_parquet_dask(
     engine_kwargs: Optional[Dict[str, Any]] = None,
     **kwargs: Any,
 ) -> None:
+    engine_kwargs = engine_kwargs or {}
+    
     if not isinstance(ddf, DaskGeoDataFrame):
         raise TypeError(f"Expected DaskGeoDataFrame not {type(ddf)}")
     filesystem = validate_coerce_filesystem(path, filesystem, storage_options)
@@ -217,7 +221,7 @@ def to_parquet_dask(
         path,
         filesystem=filesystem,
         validate_schema=False,
-        **(engine_kwargs or {}),
+        **engine_kwargs,
     )
     all_metadata = copy.copy(pqds.common_metadata.metadata)
     all_metadata[b'spatialpandas'] = b_spatial_metadata
@@ -321,12 +325,12 @@ def _perform_read_parquet_dask(
     storage_options=None,
     engine_kwargs=None,
 ):
+    engine_kwargs = engine_kwargs or {}
     filesystem = validate_coerce_filesystem(
         paths[0],
         filesystem,
         storage_options,
     )
-    engine_kwargs = engine_kwargs or {}
     datasets = [
         pa.parquet.ParquetDataset(
             path,

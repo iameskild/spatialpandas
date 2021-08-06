@@ -243,6 +243,8 @@ class DaskGeoDataFrame(dd.DataFrame):
         from .io import read_parquet, read_parquet_dask
         from .io.utils import validate_coerce_filesystem
 
+        engine_kwargs = engine_kwargs or {}
+
         # Get fsspec filesystem object
         filesystem = validate_coerce_filesystem(path, filesystem, storage_options)
 
@@ -346,7 +348,7 @@ class DaskGeoDataFrame(dd.DataFrame):
                     f,
                     compression=compression,
                     index=True,
-                    **(engine_kwargs or {}),
+                    **engine_kwargs,
                 )
 
         def process_partition(df, i):
